@@ -28,7 +28,7 @@ app.post("/Usuario", (req,res)=>{
     const  {name , email, senha } = req.body;
     const query = `INSERT INTO Usuario(name,email,senha) VALUES (?,?)`// ?? para impedir ataques maliciosos
 
-    db.run(query, [name, email], (err) => {
+    db.run(query, [name, email, senha], (err) => {
         if (err){
             res.status(400).json({message : err.message});
 
@@ -89,7 +89,7 @@ app.put('/Usuario/:email', (req, res) => {
 
 app.patch('/Usuario/:name',(req,res)=>{
     const { name } = req.params;  
-    const { name, email } = req.body; 
+    const { name, email, senha } = req.body; 
     const query = 'UPDATE Usuario SET name = ?, email = ? WHERE id = ?';
     db.run(query, [name, email], function (err) {
         if (err) {
@@ -101,7 +101,8 @@ app.patch('/Usuario/:name',(req,res)=>{
         }else{
         res.status(200).json({
             name,
-            email
+            email,
+	    senha
         });
 }});
 });
@@ -118,7 +119,8 @@ app.delete('/Usuario/:name',(req,res)=>{
         }else{
             res.status(200).json({
 		name,
-		email
+		email,
+		senha
             })
         }
     })
