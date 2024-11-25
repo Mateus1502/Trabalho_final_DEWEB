@@ -1,7 +1,6 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const app = express();
-const bcrypt = require('bcrypt');
 const port = 3000;
 
 app.use(express.json());
@@ -17,36 +16,37 @@ const db = new sqlite3.Database('./Usuariodb.sqlite', (err) => {
 db.run(`CREATE TABLE IF NOT EXISTS Usuario (
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
-    senha TEXT NOT NULL
-    dataCriacao TEXT DEFAULT CURRENT_TIMESTAMP)`, (err) => {
-        if (err) {
-            console.error('Erro ao criar tabela');
-        }
+    senha TEXT NOT NULL,
+    dataCriacao TEXT DEFAULT CURRENT_TIMESTAMP
+)`, (err) => {
+    if (err) {
+        console.error('Erro ao criar tabela:', err.message); 
+    } else {
+        console.log('Tabela criada com sucesso!');
+    }
 });
 
+
 app.post("/Usuario", (req,res)=>{
-    const  {name , email, senha } = req.body;
-    const query = `INSERT INTO Usuario(name,email,senha) VALUES (?,?)`// ?? para impedir ataques maliciosos
+    const  {name , email, senha} = req.body;
+    const query = `INSERT INTO Usuario(name,email,senha) VALUES (?,?,?)`// ?? para impedir ataques maliciosos
 
     db.run(query, [name, email, senha], (err) => {
         if (err){
             res.status(400).json({message : err.message});
 
         }else {
-            res.status(201).json({id: this.lastID , name , email});
+            res.status(201).json({name , email});
         }
 
     })
     
 });
-
-ADD ROTA DE HASHING DA SENHA DO USUÁRIO
-
 app.get('/Usuario', (req,res) => {
     const query = "SELECT * FROM  Usuario";
     db.all(query,(err,rows)=>{
         if(err){
-            console.error({'Não encontramos', err.message})
+            console.error('Não encontramos',err.message);
             return res.status(400).json({message:err.message});
         }else{
             res.status(200).json(rows);
@@ -60,7 +60,7 @@ app.get('/Usuario/:name',(req,res) =>{
     const query = 'SELECT * FROM Usuario WHERE name =?';
     db.get(query,[name], (err,row)=>{
         if (err){
-            console.error({'Não encontramos esse usuário.',err.message})
+            console.error('Não encontramos esse usuário.', err.message)
             return res.status(400).json({message:err.message})
         }else{
             res.status(200).json(row);
@@ -70,11 +70,11 @@ app.get('/Usuario/:name',(req,res) =>{
 
 app.put('/Usuario/:email', (req, res) => {
     const { email } = req.params;  
-    const { name, descricao } = req.body; 
-    const query = 'UPDATE Usuario SET name = ?, email = ? WHERE id = ?';
-    db.run(query, [name, email], function (err) {
+    const { name, senha} = req.body; 
+    const query = 'UPDATE Usuario SET name = ?,senha =?, WHERE email = ?,';
+    db.run(query, [name, email, senha], function (err) {
         if (err) {
-            console.error('Não conseguimos atualizar:', err.message);
+            console.error('Não conseguimos atualizar', err.message);
             return res.status(400).json({ message: err.message });
         }
         if (this.changes === 0) {
@@ -88,9 +88,9 @@ app.put('/Usuario/:email', (req, res) => {
 });
 
 app.patch('/Usuario/:name',(req,res)=>{
-    const { name } = req.params;  
-    const { name, email, senha } = req.body; 
-    const query = 'UPDATE Usuario SET name = ?, email = ? WHERE id = ?';
+    const {name} = req.params;  
+    const {email} = req.body; 
+    const query = 'UPDATE Usuario SET name = ?, email = ?';
     db.run(query, [name, email], function (err) {
         if (err) {
             console.error('Não foi possível executar essa tarefa:', err.message);
@@ -101,15 +101,14 @@ app.patch('/Usuario/:name',(req,res)=>{
         }else{
         res.status(200).json({
             name,
-            email,
-	    senha
+            email
         });
 }});
 });
 
 app.delete('/Usuario/:name',(req,res)=>{
     const {name}=req.params;
-    const query = 'DELETE FROM Usuario WHERE id = ?';
+    const query = 'DELETE FROM Usuario WHERE name = ?';
     db.run(query,[name],function(err){
         if(err){
             console.error('Não conseguimos deletar essa informação.',err.message);
@@ -119,8 +118,7 @@ app.delete('/Usuario/:name',(req,res)=>{
         }else{
             res.status(200).json({
 		name,
-		email,
-		senha
+		email
             })
         }
     })
