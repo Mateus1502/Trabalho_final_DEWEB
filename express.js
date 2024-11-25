@@ -87,11 +87,11 @@ app.put('/Usuario/:id', (req, res) => {
 
 app.patch('/Usuario/:id',(req,res)=>{
     const { id } = req.params;  
-    const { name, descricao } = req.body; 
-    const query = 'UPDATE items SET name = ?, descricao = ? WHERE id = ?';
+    const { name, email } = req.body; 
+    const query = 'UPDATE Usuario SET name = ?, email = ? WHERE id = ?';
     db.run(query, [name, email, id], function (err) {
         if (err) {
-            console.error('Não funfou:', err.message);
+            console.error('Não foi possível executar essa tarefa:', err.message);
             return res.status(400).json({ message: err.message });
         }
         if (this.changes === 0) {
@@ -107,7 +107,7 @@ app.patch('/Usuario/:id',(req,res)=>{
 
 app.delete('/Usuario/:id',(req,res)=>{
     const {id}=req.params;
-    const query = 'DELETE FROM items WHERE id = ?';
+    const query = 'DELETE FROM Usuario WHERE id = ?';
     db.run(query,[id],function(err){
         if(err){
             console.error('Não conseguimos deletar essa informação.',err.message);
