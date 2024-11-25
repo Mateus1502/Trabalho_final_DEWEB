@@ -1,6 +1,7 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const app = express();
+const bcrypt = require('bcrypt');
 const port = 3000;
 
 app.use(express.json());
@@ -14,9 +15,9 @@ const db = new sqlite3.Database('./Usuariodb.sqlite', (err) => {
 });
 
 db.run(`CREATE TABLE IF NOT EXISTS Usuario (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    email TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    senha TEXT NOT NULL
     dataCriacao TEXT DEFAULT CURRENT_TIMESTAMP)`, (err) => {
         if (err) {
             console.error('Erro ao criar tabela');
@@ -24,8 +25,8 @@ db.run(`CREATE TABLE IF NOT EXISTS Usuario (
 });
 
 app.post("/Usuario", (req,res)=>{
-    const  {name , email } = req.body;
-    const query = `INSERT INTO items(name,email) VALUES (?,?)`// ?? para impedir ataques maliciosos
+    const  {name , email, senha } = req.body;
+    const query = `INSERT INTO Usuario(name,email,senha) VALUES (?,?)`// ?? para impedir ataques maliciosos
 
     db.run(query, [name, email], (err) => {
         if (err){
@@ -38,6 +39,8 @@ app.post("/Usuario", (req,res)=>{
     })
     
 });
+
+ADD ROTA DE HASHING DA SENHA DO USUÁRIO
 
 app.get('/Usuario', (req,res) => {
     const query = "SELECT * FROM  Usuario";
@@ -52,10 +55,10 @@ app.get('/Usuario', (req,res) => {
 
 });
 
-app.get('/Usuario/:id',(req,res) =>{
-    const {id} = req.params;
-    const query = 'SELECT * FROM Usuario WHERE id =?';
-    db.get(query,[id], (err,row)=>{
+app.get('/Usuario/:name',(req,res) =>{
+    const {name} = req.params;
+    const query = 'SELECT * FROM Usuario WHERE name =?';
+    db.get(query,[name], (err,row)=>{
         if (err){
             console.error({'Não encontramos esse usuário.',err.message})
             return res.status(400).json({message:err.message})
@@ -65,11 +68,11 @@ app.get('/Usuario/:id',(req,res) =>{
     })
 });
 
-app.put('/Usuario/:id', (req, res) => {
-    const { id } = req.params;  
+app.put('/Usuario/:email', (req, res) => {
+    const { email } = req.params;  
     const { name, descricao } = req.body; 
     const query = 'UPDATE Usuario SET name = ?, email = ? WHERE id = ?';
-    db.run(query, [name, email, id], function (err) {
+    db.run(query, [name, email], function (err) {
         if (err) {
             console.error('Não conseguimos atualizar:', err.message);
             return res.status(400).json({ message: err.message });
@@ -78,18 +81,17 @@ app.put('/Usuario/:id', (req, res) => {
             return res.status(404).json({ message: 'Item não encontrado!' });
         }else{
         res.status(200).json({
-            id,
             name,
             email
         });
 }});
 });
 
-app.patch('/Usuario/:id',(req,res)=>{
-    const { id } = req.params;  
+app.patch('/Usuario/:name',(req,res)=>{
+    const { name } = req.params;  
     const { name, email } = req.body; 
     const query = 'UPDATE Usuario SET name = ?, email = ? WHERE id = ?';
-    db.run(query, [name, email, id], function (err) {
+    db.run(query, [name, email], function (err) {
         if (err) {
             console.error('Não foi possível executar essa tarefa:', err.message);
             return res.status(400).json({ message: err.message });
@@ -98,17 +100,16 @@ app.patch('/Usuario/:id',(req,res)=>{
             return res.status(404).json({ message: 'Perdão,não conseguimos encontrar.' });
         }else{
         res.status(200).json({
-            id,
             name,
             email
         });
 }});
 });
 
-app.delete('/Usuario/:id',(req,res)=>{
-    const {id}=req.params;
+app.delete('/Usuario/:name',(req,res)=>{
+    const {name}=req.params;
     const query = 'DELETE FROM Usuario WHERE id = ?';
-    db.run(query,[id],function(err){
+    db.run(query,[name],function(err){
         if(err){
             console.error('Não conseguimos deletar essa informação.',err.message);
             return res.status(400).json({message:err.message});            
@@ -116,7 +117,6 @@ app.delete('/Usuario/:id',(req,res)=>{
             return res.status(404).json({message:'Dado não encontrado'})
         }else{
             res.status(200).json({
-                id,
 		name,
 		email
             })
