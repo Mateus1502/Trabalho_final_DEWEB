@@ -71,7 +71,7 @@ app.put('/Usuario/:id', (req, res) => {
     const query = 'UPDATE Usuario SET name = ?, email = ? WHERE id = ?';
     db.run(query, [name, email, id], function (err) {
         if (err) {
-            console.error('Não funfou:', err.message);
+            console.error('Não conseguimos atualizar:', err.message);
             return res.status(400).json({ message: err.message });
         }
         if (this.changes === 0) {
