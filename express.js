@@ -14,6 +14,7 @@ const db = new sqlite3.Database('./Usuariodb.sqlite', (err) => {
 });
 
 db.run(`CREATE TABLE IF NOT EXISTS Usuario (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
     senha TEXT NOT NULL,
@@ -29,7 +30,7 @@ db.run(`CREATE TABLE IF NOT EXISTS Usuario (
 
 app.post("/Usuario", (req,res)=>{
     const  {name , email, senha} = req.body;
-    const query = `INSERT INTO Usuario(name,email,senha) VALUES (?,?,?)`// ?? para impedir ataques maliciosos
+    const query = `INSERT INTO Usuario(name,email,senha) VALUES (?,?,?)`
 
     db.run(query, [name, email, senha], (err) => {
         if (err){
@@ -123,6 +124,11 @@ app.delete('/Usuario/:name',(req,res)=>{
         }
     })
 })
+app.use(express.static('nome da pasta'));
+
+app.get('/',(_req,res)=> {
+    res.sendFile(__dirname +'/nome do arquivo.extensão que foi feito')
+});
 app.listen(port, () => {
     console.log(`Servidor rodando em http://localhost:${port}`);
 });
