@@ -129,6 +129,18 @@ app.use(express.static('nome da pasta'));
 app.get('/',(_req,res)=> {
     res.sendFile(__dirname +'/nome do arquivo.extensão que foi feito')
 });
+app.get('/',(_req,res)=> {
+    res.sendFile(__dirname +'/nome do arquivo.extensão que foi feito')
+});
+app.get('/',(_req,res)=> {
+    res.sendFile(__dirname +'/nome do arquivo.extensão que foi feito')
+});
+app.get('/',(_req,res)=> {
+    res.sendFile(__dirname +'/nome do arquivo.extensão que foi feito')
+});
+app.get('/',(_req,res)=> {
+    res.sendFile(__dirname +'/nome do arquivo.extensão que foi feito')
+});
 app.listen(port, () => {
     console.log(`Servidor rodando em http://localhost:${port}`);
 });
