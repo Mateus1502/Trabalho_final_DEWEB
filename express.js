@@ -5,7 +5,7 @@ const port = 3000;
 
 app.use(express.json());
 
-const db = new sqlite3.Database('./Usuariodb.sqlite', (err) => {
+const db = new sqlite3.Database('./usuariodb.sqlite', (err) => {
     if(err) {
         console.error('Deu erro!');
     } else {
@@ -13,7 +13,7 @@ const db = new sqlite3.Database('./Usuariodb.sqlite', (err) => {
     }
 });
 
-db.run(`CREATE TABLE IF NOT EXISTS Usuario (
+db.run(`CREATE TABLE IF NOT EXISTS usuario (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
@@ -28,9 +28,9 @@ db.run(`CREATE TABLE IF NOT EXISTS Usuario (
 });
 
 
-app.post("/Usuario", (req,res)=>{
+app.post("/usuario", (req,res)=>{
     const  {name , email, senha} = req.body;
-    const query = `INSERT INTO Usuario(name,email,senha) VALUES (?,?,?)`
+    const query = `INSERT INTO usuario(name,email,senha) VALUES (?,?,?)`
 
     db.run(query, [name, email, senha], (err) => {
         if (err){
@@ -43,8 +43,8 @@ app.post("/Usuario", (req,res)=>{
     })
     
 });
-app.get('/Usuario', (req,res) => {
-    const query = "SELECT * FROM  Usuario";
+app.get('/usuario', (req,res) => {
+    const query = "SELECT * FROM  usuario";
     db.all(query,(err,rows)=>{
         if(err){
             console.error('Não encontramos',err.message);
@@ -56,10 +56,10 @@ app.get('/Usuario', (req,res) => {
 
 });
 
-app.get('/Usuario/:name',(req,res) =>{
-    const {name} = req.params;
-    const query = 'SELECT * FROM Usuario WHERE name =?';
-    db.get(query,[name], (err,row)=>{
+app.get('/usuario/:id',(req,res) =>{
+    const {id} = req.params;
+    const query = 'SELECT * FROM usuario WHERE id =?';
+    db.get(query,[id], (err,row)=>{
         if (err){
             console.error('Não encontramos esse usuário.', err.message)
             return res.status(400).json({message:err.message})
@@ -69,10 +69,10 @@ app.get('/Usuario/:name',(req,res) =>{
     })
 });
 
-app.put('/Usuario/:email', (req, res) => {
-    const { email } = req.params;  
+app.put('/usuario/:id', (req, res) => {
+    const { id } = req.params;  
     const { name, senha} = req.body; 
-    const query = 'UPDATE Usuario SET name = ?,senha =?, WHERE email = ?,';
+    const query = 'UPDATE usuario SET name = ?,senha =?, WHERE email = ?,';
     db.run(query, [name, email, senha], function (err) {
         if (err) {
             console.error('Não conseguimos atualizar', err.message);
@@ -82,16 +82,18 @@ app.put('/Usuario/:email', (req, res) => {
             return res.status(404).json({ message: 'Item não encontrado!' });
         }else{
         res.status(200).json({
+            id,
             name,
-            email
+            email,
+            senha
         });
 }});
 });
 
-app.patch('/Usuario/:name',(req,res)=>{
-    const {name} = req.params;  
+app.patch('/usuario/:id',(req,res)=>{
+    const {id} = req.params;  
     const {email} = req.body; 
-    const query = 'UPDATE Usuario SET name = ?, email = ?';
+    const query = 'UPDATE usuario SET name = ?, email = ?';
     db.run(query, [name, email], function (err) {
         if (err) {
             console.error('Não foi possível executar essa tarefa:', err.message);
@@ -101,16 +103,15 @@ app.patch('/Usuario/:name',(req,res)=>{
             return res.status(404).json({ message: 'Perdão,não conseguimos encontrar.' });
         }else{
         res.status(200).json({
-            name,
-            email
+            id
         });
 }});
 });
 
-app.delete('/Usuario/:name',(req,res)=>{
-    const {name}=req.params;
-    const query = 'DELETE FROM Usuario WHERE name = ?';
-    db.run(query,[name],function(err){
+app.delete('/usuario/:id',(req,res)=>{
+    const {id}=req.params;
+    const query = 'DELETE FROM usuario WHERE id = ?';
+    db.run(query,[id],function(err){
         if(err){
             console.error('Não conseguimos deletar essa informação.',err.message);
             return res.status(400).json({message:err.message});            
@@ -118,28 +119,30 @@ app.delete('/Usuario/:name',(req,res)=>{
             return res.status(404).json({message:'Dado não encontrado'})
         }else{
             res.status(200).json({
-		name,
-		email
+		id
             })
         }
     })
 })
-app.use(express.static('nome da pasta'));
+app.use(express.static('sssss'));
 
-app.get('/',(_req,res)=> {
-    res.sendFile(__dirname +'/nome do arquivo.extensão que foi feito')
+app.get('/criar_conta',(_req,res)=> {
+    res.sendFile(__dirname +'/criar_conta.html')
 });
-app.get('/',(_req,res)=> {
-    res.sendFile(__dirname +'/nome do arquivo.extensão que foi feito')
+app.get('/editar',(_req,res)=> {
+    res.sendFile(__dirname +'/editar.html')
 });
-app.get('/',(_req,res)=> {
-    res.sendFile(__dirname +'/nome do arquivo.extensão que foi feito')
+app.get('/quizz',(_req,res)=> {
+    res.sendFile(__dirname +'/quizz.js')
 });
-app.get('/',(_req,res)=> {
-    res.sendFile(__dirname +'/nome do arquivo.extensão que foi feito')
+app.get('/quuizzz',(_req,res)=> {
+    res.sendFile(__dirname +'/quizz.html')
 });
-app.get('/',(_req,res)=> {
-    res.sendFile(__dirname +'/nome do arquivo.extensão que foi feito')
+app.get('/resultado',(_req,res)=> {
+    res.sendFile(__dirname +'/resultado.html')
+});
+app.get('/usuario',(_req,res)=> {
+    res.sendFile(__dirname +'/usuario.html')
 });
 app.listen(port, () => {
     console.log(`Servidor rodando em http://localhost:${port}`);
